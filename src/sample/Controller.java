@@ -15,9 +15,9 @@ public class Controller {
     @FXML
     private void initialize(){
         calculator = new Calc();
-        data = new InputTable("/home/pacman29/Grad_02/Model_grad/n.txt",
-                "/home/pacman29/Grad_02/Model_grad/t.txt",
-                "/home/pacman29/Grad_02/Model_grad/sigma.txt");
+        data = new InputTable("/home/pacman29/Model_grad/n.txt",
+                "/home/pacman29/Model_grad/t.txt",
+                "/home/pacman29/Model_grad/sigma.txt");
         Var var = new Var();
 
         var.setCk(Double.valueOf(input_ck.getText()));
@@ -68,6 +68,8 @@ public class Controller {
     private ObservableList<Solution> result;
     @FXML
     private void Calculate(){
+
+        this.new_params();
 
         Double step = Double.valueOf(input_step.getText());
         Integer nodes = Integer.valueOf(input_nodes.getText());
