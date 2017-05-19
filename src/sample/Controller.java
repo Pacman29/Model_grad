@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 
@@ -14,6 +15,9 @@ public class Controller {
 
     private Calculator calc;
     private InputTable inputTable;
+
+    @FXML
+    private NumberAxis xAxis, yAxis;
 
     @FXML
     private void initialize(){
@@ -31,7 +35,7 @@ public class Controller {
         this.N_izo_edit_change();
         this.tau_edit_change();
 
-        //chart.getStylesheets().add(Main.class.getResource("chart.css").toExternalForm());
+        chart.getStylesheets().add(Main.class.getResource("chart.css").toExternalForm());
         r_edit.textProperty().addListener((observable,oldValue,newValue)-> {
             Double tmp = Double.valueOf(newValue);
             this.calc.setR(tmp);
@@ -70,7 +74,14 @@ public class Controller {
             this.calc.setTau(tmp);
         });
 
+        yAxis.setAutoRanging(false);
+        yAxis.setLowerBound(250.);
+        yAxis.setUpperBound(2000.);
+        yAxis.setTickUnit(100.);
     }
+
+    @FXML
+    private Label lbl_step_izo;
 
     @FXML
     private TextField r_edit,l_edit, tenv_edit, f0_edit, S0_edit, m_edit, a0_edit, an_edit, node_edit,N_izo_edit,tau_edit;
@@ -94,19 +105,19 @@ public class Controller {
 
         result = this.calc.calculate(N);
 
+        yAxis.setLowerBound(this.calc.getTenv()-50.);
         int gnum = this.calc.getNizo();
         chart.getData().clear();
         for (int i = 0; i<gnum; ++i){
             Graph graph = result.get((result.size()-1) * i / (gnum -1));
             ObservableList<Solution> tmp = FXCollections.observableList(graph.getSolutionArray());
-            XYChart.Series<String, String> series = new XYChart.Series<>();
-            ObservableList<XYChart.Data<String,String>> datas = FXCollections.observableArrayList();
+            XYChart.Series<Double, Double> series = new XYChart.Series<>();
+            ObservableList<XYChart.Data<Double,Double>> datas = FXCollections.observableArrayList();
             int j = -1;
             for(Solution point: tmp){
                 j++;
-                if(j % 20 == 0) {
-                    datas.add(new XYChart.Data(((Double) (Math.rint(10e+6 * point.getX()) / 10e+6)).toString(),
-                            ((Double) (Math.rint(10e+2 * point.getT()) / 10e+2)).toString()));
+                if(j % 10 == 0) {
+                    datas.add(new XYChart.Data(point.getX(),point.getT()));
                 } else{
                     continue;
                 }
@@ -114,6 +125,8 @@ public class Controller {
             series.setData(datas);
             chart.getData().add(series);
         }
+
+        this.lbl_step_izo.setText(((Double)((result.size()-1)*calc.getTau()/(gnum-1))).toString()+" c.");
     }
 
     private void r_edit_change(){
