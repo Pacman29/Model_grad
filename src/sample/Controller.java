@@ -101,9 +101,15 @@ public class Controller {
             ObservableList<Solution> tmp = FXCollections.observableList(graph.getSolutionArray());
             XYChart.Series<String, String> series = new XYChart.Series<>();
             ObservableList<XYChart.Data<String,String>> datas = FXCollections.observableArrayList();
+            int j = -1;
             for(Solution point: tmp){
-                datas.add(new XYChart.Data( ((Double)( Math.rint(10e+6 * point.getX()) / 10e+6)).toString(),
-                        ((Double)( Math.rint(10e+6 * point.getT()) / 10e+6)).toString()));
+                j++;
+                if(j % 20 == 0) {
+                    datas.add(new XYChart.Data(((Double) (Math.rint(10e+6 * point.getX()) / 10e+6)).toString(),
+                            ((Double) (Math.rint(10e+2 * point.getT()) / 10e+2)).toString()));
+                } else{
+                    continue;
+                }
             }
             series.setData(datas);
             chart.getData().add(series);

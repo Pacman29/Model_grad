@@ -396,7 +396,7 @@ public class Calculator {
 
     double hi(double t1, double t2)
     {
-        return 2. * k(t1) * k(t2) / (k(t1) + k(t2));
+        return (Table.get_K(t1) + Table.get_K(t2))/2;
     }
 
     double f(double x, double t, double r)
