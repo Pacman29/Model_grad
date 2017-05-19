@@ -5,6 +5,10 @@ package sample;
  */
 public class Solution {
 
+    public Solution copy(){
+        return new Solution(this.x,this.t);
+    }
+
     public Double getX() {
         return x;
     }

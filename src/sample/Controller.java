@@ -4,23 +4,22 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 
-import javafx.scene.chart.Chart;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
-import java.util.List;
 
 public class Controller {
 
     private Calculator calc;
+    private InputTable inputTable;
 
     @FXML
     private void initialize(){
         this.calc = new Calculator();
+        this.inputTable = new InputTable("data.txt");
+        this.calc.getTable().setTable(inputTable.getFileTable());
         this.r_edit_change();
         this.l_edit_change();
         this.tenv_edit_change();
@@ -29,10 +28,10 @@ public class Controller {
         this.m_edit_change();
         this.a0_edit_change();
         this.an_edit_change();
+        this.N_izo_edit_change();
+        this.tau_edit_change();
 
-        x_column.setCellValueFactory(new PropertyValueFactory<Solution,Double>("x"));
-        t_column.setCellValueFactory(new PropertyValueFactory<Solution,Double>("t"));
-        chart.getStylesheets().add(Main.class.getResource("chart.css").toExternalForm());
+        //chart.getStylesheets().add(Main.class.getResource("chart.css").toExternalForm());
         r_edit.textProperty().addListener((observable,oldValue,newValue)-> {
             Double tmp = Double.valueOf(newValue);
             this.calc.setR(tmp);
@@ -62,17 +61,19 @@ public class Controller {
             Double tmp = Double.valueOf(newValue);
             this.calc.setaN(tmp);
         });
+        N_izo_edit.textProperty().addListener((observable,oldValue,newValue)-> {
+            Integer tmp = Integer.valueOf(newValue);
+            this.calc.setNizo(tmp);
+        });
+        tau_edit.textProperty().addListener((observable,oldValue,newValue)-> {
+            Double tmp = Double.valueOf(newValue);
+            this.calc.setTau(tmp);
+        });
 
     }
 
     @FXML
-    private TableView table;
-
-    @FXML
-    private TableColumn<Solution,Double> x_column, t_column;
-
-    @FXML
-    private TextField r_edit,l_edit, tenv_edit, f0_edit, S0_edit, m_edit, a0_edit, an_edit, node_edit;
+    private TextField r_edit,l_edit, tenv_edit, f0_edit, S0_edit, m_edit, a0_edit, an_edit, node_edit,N_izo_edit,tau_edit;
 
     @FXML
     private LineChart chart;
@@ -82,29 +83,31 @@ public class Controller {
         chart.getData().clear();
     }
 
-    private ObservableList<Solution> result;
+    private ArrayList<Graph> result;
     @FXML
     private void calculate(){
 
 
         Integer N = Integer.valueOf(node_edit.getText());
 
-        result = FXCollections.observableList(this.calc.calculate(N));
+        //result = FXCollections.observableList(this.calc.calculate(N));
 
-        table.setItems(result);
+        result = this.calc.calculate(N);
 
-        XYChart.Series<String, Double> series = new XYChart.Series<>();
-        ObservableList<XYChart.Data<String,Double>> datas = FXCollections.observableArrayList();
-
-        for(int i = 0; i< result.size(); ++i){
-            datas.add(new XYChart.Data(result.get(i).getX().toString(),result.get(i).getT()));
+        int gnum = this.calc.getNizo();
+        chart.getData().clear();
+        for (int i = 0; i<gnum; ++i){
+            Graph graph = result.get((result.size()-1) * i / (gnum -1));
+            ObservableList<Solution> tmp = FXCollections.observableList(graph.getSolutionArray());
+            XYChart.Series<String, String> series = new XYChart.Series<>();
+            ObservableList<XYChart.Data<String,String>> datas = FXCollections.observableArrayList();
+            for(Solution point: tmp){
+                datas.add(new XYChart.Data( ((Double)( Math.rint(10e+6 * point.getX()) / 10e+6)).toString(),
+                        ((Double)( Math.rint(10e+6 * point.getT()) / 10e+6)).toString()));
+            }
+            series.setData(datas);
+            chart.getData().add(series);
         }
-
-        series.setData(datas);
-
-        //chart.getData().clear();
-
-        chart.getData().add(series);
     }
 
     private void r_edit_change(){
@@ -145,5 +148,15 @@ public class Controller {
     private void an_edit_change(){
         Double tmp = Double.valueOf(an_edit.getText());
         this.calc.setaN(tmp);
+    }
+
+    private void N_izo_edit_change(){
+        Integer tmp = Integer.valueOf(N_izo_edit.getText());
+        this.calc.setNizo(tmp);
+    }
+
+    private void tau_edit_change(){
+        Double tmp = Double.valueOf(tau_edit.getText());
+        this.calc.setTau(tmp);
     }
 }
